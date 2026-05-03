@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AI Page Summarizer</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,600;1,9..144,300&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="popup.css" />
+</head>
+<body>
+
+  <!-- ── Header ── -->
+  <header class="header">
+    <div class="header-left">
+      <div class="logo-mark">
+        <svg width="22" height="22" viewBox="0 0 22 22" fill="none">
+          <circle cx="11" cy="11" r="10" stroke="var(--accent)" stroke-width="1.5"/>
+          <path d="M6 11h10M11 6l5 5-5 5" stroke="var(--accent)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </div>
+      <span class="logo-text">Lumen<em>AI</em></span>
+    </div>
+    <div class="header-actions">
+      <button class="icon-btn" id="settingsBtn" title="Settings" aria-label="Settings">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+          <circle cx="8" cy="8" r="2.5" stroke="currentColor" stroke-width="1.4"/>
+          <path d="M8 1v2M8 13v2M1 8h2M13 8h2M3.05 3.05l1.41 1.41M11.54 11.54l1.41 1.41M3.05 12.95l1.41-1.41M11.54 4.46l1.41-1.41" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/>
+        </svg>
+      </button>
+      <button class="icon-btn" id="themeBtn" title="Toggle theme" aria-label="Toggle theme">
+        <svg id="moonIcon" width="16" height="16" viewBox="0 0 16 16" fill="none">
+          <path d="M13.5 10A6 6 0 0 1 6 2.5a6 6 0 1 0 7.5 7.5z" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/>
+        </svg>
+        <svg id="sunIcon" width="16" height="16" viewBox="0 0 16 16" fill="none" style="display:none">
+          <circle cx="8" cy="8" r="3" stroke="currentColor" stroke-width="1.4"/>
+          <path d="M8 1v2M8 13v2M1 8h2M13 8h2M3.05 3.05l1.41 1.41M11.54 11.54l1.41 1.41M3.05 12.95l1.41-1.41M11.54 4.46l1.41-1.41" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/>
+        </svg>
+      </button>
+    </div>
+  </header>
+
+  <!-- ── Main Views ── -->
+  <main class="main">
+
+    <!-- Settings Panel -->
+    <section id="settingsPanel" class="panel settings-panel hidden" role="region" aria-label="Settings">
+      <h2 class="panel-title">Settings</h2>
+
+      <div class="backend-note">
+        <svg width="13" height="13" viewBox="0 0 13 13" fill="none" aria-hidden="true">
+          <circle cx="6.5" cy="6.5" r="5.5" stroke="var(--accent)" stroke-width="1.2"/>
+          <path d="M6.5 5.5v4M6.5 4h.01" stroke="var(--accent)" stroke-width="1.3" stroke-linecap="round"/>
+        </svg>
+        API key is managed securely on the backend server. No key needed here.
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Summary Length</label>
+        <div class="radio-group" role="radiogroup">
+          <label class="radio-label">
+            <input type="radio" name="bulletCount" value="3" /> <span>Brief (3)</span>
+          </label>
+          <label class="radio-label">
+            <input type="radio" name="bulletCount" value="5" checked /> <span>Standard (5)</span>
+          </label>
+          <label class="radio-label">
+            <input type="radio" name="bulletCount" value="8" /> <span>Detailed (8)</span>
+          </label>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Tone</label>
+        <div class="radio-group" role="radiogroup">
+          <label class="radio-label">
+            <input type="radio" name="tone" value="concise" checked /> <span>Concise</span>
+          </label>
+          <label class="radio-label">
+            <input type="radio" name="tone" value="detailed" /> <span>Detailed</span>
+          </label>
+          <label class="radio-label">
+            <input type="radio" name="tone" value="simple" /> <span>Simple</span>
+          </label>
+        </div>
+      </div>
+
+      <div class="settings-actions">
+        <button class="btn btn-primary" id="saveSettingsBtn">Save Settings</button>
+        <button class="btn btn-ghost" id="clearCacheBtn">Clear Cache</button>
+      </div>
+
+      <p id="settingsMsg" class="settings-msg" aria-live="polite"></p>
+    </section>
+
+    <!-- Main Summary Panel -->
+    <section id="mainPanel" class="panel main-panel" role="main">
+
+      <!-- Page Info -->
+      <div class="page-info" id="pageInfo">
+        <div class="page-favicon" id="pageFavicon"></div>
+        <p class="page-title" id="pageTitle">Loading page…</p>
+      </div>
+
+      <!-- Backend unreachable -->
+      <div id="setupNeeded" class="state-block hidden">
+        <div class="state-icon">🔌</div>
+        <p class="state-msg" id="setupMsg">Cannot reach the backend server. Make sure Django is running.</p>
+        <button class="btn btn-secondary" id="retryConnectBtn">Retry</button>
+      </div>
+
+      <!-- Idle state -->
+      <div id="idleState" class="state-block hidden">
+        <button class="btn btn-primary btn-large" id="summarizeBtn">
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+            <path d="M2 4h12M2 8h8M2 12h10" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+            <circle cx="13" cy="12" r="2.5" stroke="var(--accent)" stroke-width="1.3" fill="none"/>
+            <path d="M12.3 12h1.4M13 11.3v1.4" stroke="var(--accent)" stroke-width="1.2" stroke-linecap="round"/>
+          </svg>
+          Summarize Page
+        </button>
+        <p class="idle-hint">Extracts content and generates an AI summary</p>
+      </div>
+
+      <!-- Loading state -->
+      <div id="loadingState" class="state-block hidden">
+        <div class="spinner" aria-hidden="true">
+          <div class="spinner-ring"></div>
+          <div class="spinner-ring"></div>
+        </div>
+        <p class="loading-msg" id="loadingMsg">Extracting content…</p>
+        <div class="loading-bar">
+          <div class="loading-bar-fill" id="loadingBarFill"></div>
+        </div>
+      </div>
+
+      <!-- Error state -->
+      <div id="errorState" class="state-block hidden">
+        <div class="state-icon"></div>
+        <p class="error-msg" id="errorMsg"></p>
+        <button class="btn btn-secondary" id="retryBtn">Try Again</button>
+      </div>
+
+      <!-- Summary output -->
+      <div id="summaryState" class="summary-output hidden">
+
+        <!-- Meta row -->
+        <div class="meta-row">
+          <span class="meta-badge" id="contentTypeBadge"></span>
+          <span class="meta-stat">
+            <svg width="12" height="12" viewBox="0 0 12 12" fill="none" aria-hidden="true">
+              <circle cx="6" cy="6" r="5" stroke="currentColor" stroke-width="1.2"/>
+              <path d="M6 3v3l2 1" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/>
+            </svg>
+            <span id="readingTime"></span> min read
+          </span>
+          <span class="meta-stat">
+            <svg width="12" height="12" viewBox="0 0 12 12" fill="none" aria-hidden="true">
+              <rect x="1" y="2" width="10" height="8" rx="1" stroke="currentColor" stroke-width="1.2"/>
+              <path d="M3 5h6M3 7.5h4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/>
+            </svg>
+            <span id="wordCount"></span> words
+          </span>
+          <span class="cache-badge hidden" id="cacheBadge" title="Loaded from cache">cached</span>
+        </div>
+
+        <!-- Summary -->
+        <div class="section">
+          <h3 class="section-title">Summary</h3>
+          <p class="summary-text" id="summaryText"></p>
+        </div>
+
+        <!-- Bullets -->
+        <div class="section">
+          <h3 class="section-title">Key Points</h3>
+          <ul class="bullet-list" id="bulletList"></ul>
+        </div>
+
+        <!-- Insights -->
+        <div class="section">
+          <h3 class="section-title">Insights</h3>
+          <ul class="insight-list" id="insightList"></ul>
+        </div>
+
+        <!-- Actions -->
+        <div class="action-row">
+          <button class="btn btn-secondary btn-sm" id="highlightBtn">
+            <svg width="13" height="13" viewBox="0 0 13 13" fill="none" aria-hidden="true">
+              <path d="M2 10l2-2 5-5 1 1-5 5-2 2H2v-1z" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"/>
+              <path d="M8 3l1 1" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/>
+            </svg>
+            Highlight
+          </button>
+          <button class="btn btn-secondary btn-sm" id="copyBtn">
+            <svg width="13" height="13" viewBox="0 0 13 13" fill="none" aria-hidden="true">
+              <rect x="4" y="4" width="8" height="8" rx="1" stroke="currentColor" stroke-width="1.2"/>
+              <path d="M1 9V1h8" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            Copy
+          </button>
+          <button class="btn btn-ghost btn-sm" id="clearBtn">
+            <svg width="13" height="13" viewBox="0 0 13 13" fill="none" aria-hidden="true">
+              <path d="M2 2l9 9M11 2l-9 9" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/>
+            </svg>
+            Clear
+          </button>
+        </div>
+
+      </div>
+    </section>
+
+  </main>
+
+  <script src="popup.js"></script>
+</body>
+</html>
