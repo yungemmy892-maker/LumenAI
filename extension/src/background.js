@@ -3,7 +3,7 @@
 
 // ── Config ────────────────────────────────────────────────────────────────────
 // Change BACKEND_URL to your deployed server address in production.
-const BACKEND_URL = "http://localhost:8000";
+const BACKEND_URL = "https://your-app.onrender.com";
 const SUMMARIZE_ENDPOINT = `${BACKEND_URL}/api/summarize/`;
 
 const CACHE_TTL_MS = 30 * 60 * 1000; // 30 minutes
