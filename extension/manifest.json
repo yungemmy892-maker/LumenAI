@@ -20,25 +20,16 @@
     "default_title": "AI Page Summarizer"
   },
   "background": {
-    "service_worker": "src/background.js",
-    "type": "module"
+    "service_worker": "src/background.js"
   },
   "content_scripts": [
     {
-      "matches": [
-        "<all_urls>"
-      ],
-      "js": [
-        "src/content.js"
-      ],
+      "matches": ["<all_urls>"],
+      "js": ["src/content.js"],
       "run_at": "document_idle"
     }
   ],
-  "permissions": [
-    "activeTab",
-    "storage",
-    "scripting"
-  ],
+  "permissions": ["activeTab", "storage", "scripting"],
   "host_permissions": [
     "http://localhost:8000/*",
     "https://lumenai-d1e4.onrender.com/*"
