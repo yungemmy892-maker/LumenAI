@@ -40,6 +40,7 @@
     "scripting"
   ],
   "host_permissions": [
-    "http://localhost:8000/*"
+    "http://localhost:8000/*",
+    "https://lumenai-d1e4.onrender.com/*"
   ]
 }
