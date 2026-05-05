@@ -1,183 +1,367 @@
-# 🔍 LumenAI — AI Page Summarizer
+# 🧠 AI Page Summarizer
 
-A Chrome Extension + Django backend in one folder. The extension extracts page content and sends it to the local Django server, which holds your Anthropic API key and calls the AI. The key never touches the browser.
+A Chrome Extension + Django backend that uses AI to instantly summarize any webpage into:
+
+* 📌 Bullet points
+* 🔍 Key insights
+* ⏱️ Reading time
+* ✨ Highlights
+
+Built with a scalable architecture using:
+
+* Chrome Extension (Frontend)
+* Django (Backend API)
+* Gemini + Groq (AI providers)
+* Render (Backend Hosting)
+* Vercel (Frontend Hosting)
 
 ---
 
-## ✨ Features
+# 🚀 Features
 
-- **Smart content extraction** — heuristic-based readability parser strips navbars, footers, ads, and sidebar noise
-- **Structured AI summaries** — bullet-point key points, key insights, reading time, and word count
-- **In-page highlighting** — highlight important phrases directly on the webpage
-- **Per-URL caching** — summaries cached for 30 minutes to avoid redundant API calls
-- **Dark/light mode** — persistent theme preference
-- **Configurable** — choose summary length (3 / 5 / 8 bullets) and tone (concise / detailed / simple)
-- **Rate limiting** — max 10 requests/minute to prevent accidental overuse
-- **Copy to clipboard** — one-click copy of the full summary
+* ⚡ One-click webpage summarization
+* 🧠 AI-powered structured output
+* 📦 Caching system (reduces API usage)
+* 🚦 Rate limiting (client-side protection)
+* 🔐 Secure API (no keys exposed in frontend)
+* 🌍 Works on any website
 
 ---
 
-## 📁 Project Structure
+# 🏗️ Project Structure
 
 ```
 ai-page-summarizer/
 │
-├── 📦 EXTENSION (load this whole folder into Chrome)
-├── manifest.json
-├── popup.html
-├── popup.css
-├── popup.js
-├── icons/
-│   ├── icon16.png
-│   ├── icon32.png
-│   ├── icon48.png
-│   └── icon128.png
-└── src/
-│   ├── background.js      ← calls Django at localhost:8000
-│   └── content.js         ← extracts page text + highlights
+├── extension/                 # Chrome Extension (Frontend)
+│   ├── manifest.json
+│   ├── popup.html
+│   ├── popup.css
+│   ├── popup.js
+│   ├── icons/
+│   └── src/
+│       ├── background.js
+│       └── content.js
 │
-└── 🖥️  BACKEND (run this to power the AI)
-    backend/
+└── backend/                   # Django Backend (AI Engine)
     ├── manage.py
     ├── requirements.txt
-    ├── .env                ← YOUR API KEY GOES HERE
+    ├── .env
     ├── config/
     │   ├── settings.py
     │   └── urls.py
     └── api/
         ├── views.py
-        ├── urls.py
         └── services/
-            └── ai_service.py   ← only file that touches the API key
+            └── ai_service.py
 ```
 
 ---
 
-## 🚀 Setup (do this once)
+# ⚙️ Setup (Local Development)
 
-1. **Download / clone** this repository:
-   ```bash
-   git clone https://github.com/YOUR_USERNAME/ai-page-summarizer.git
-   ```
-   Or download and unzip the ZIP file.
+## 1. Clone the repo
+
+```
+git clone https://github.com/YOUR_USERNAME/ai-page-summarizer.git
+cd ai-page-summarizer
+```
+
 ---
 
-### Step 2 — Set up the Backend
+## 2. Backend Setup (Django)
 
-Open a terminal and `cd` into the `backend` folder inside the project:
-
-```bash
-cd ai-page-summarizer/backend
 ```
-
-Create and activate a virtual environment:
-
-```bash
-# Mac / Linux
-python3 -m venv venv
-source venv/bin/activate
-
-# Windows
-python -m venv venv
-venv\Scripts\activate
-```
-
-Install dependencies:
-
-```bash
+cd backend
+python -m venv .venv
+source .venv/bin/activate   # Windows: .venv\Scripts\activate
 pip install -r requirements.txt
 ```
 
-Add your Anthropic API key to `.env`:
+---
 
-```bash
-# Open backend/.env in any text editor and fill in:
-SECRET_KEY=any-long-random-string-for-django
-ANTHROPIC_API_KEY=sk-ant-api03-your-real-key-here
+## 3. Create `.env`
+
+```
+SECRET_KEY=your-secret-key
 DEBUG=True
-ALLOWED_HOSTS=localhost,127.0.0.1
+
+GEMINI_API_KEY=your_key
+GROQ_API_KEY=your_key
 ```
 
-> Get your key at: https://console.anthropic.com/settings/keys
+---
 
-Start the Django server:
+## 4. Run server
 
-```bash
+```
 python manage.py runserver
 ```
 
-You should see:
+👉 Backend runs at:
+
 ```
-Starting development server at http://127.0.0.1:8000/
+http://localhost:8000
 ```
 
-**Leave this terminal running** while you use the extension.
+---
+
+## 5. Load Chrome Extension
+
+1. Go to:
+
+```
+chrome://extensions/
+```
+
+2. Enable:
+   👉 Developer Mode
+
+3. Click:
+   👉 Load Unpacked
+
+4. Select:
+
+```
+ai-page-summarizer/extension/
+```
 
 ---
 
-### Step 3 — Install the Extension
+## 6. Update Backend URL
 
-1. Open Chrome and go to: `chrome://extensions`
-2. Enable **Developer mode** (toggle in top-right)
-3. Click **"Load unpacked"**
-4. Select the **`ai-page-summarizer` folder** — the root one containing `manifest.json`
-5. Click the 🧩 puzzle icon in Chrome toolbar → pin **LumenAI**
+In:
 
----
+```
+extension/src/background.js
+```
 
-### Step 4 — Summarize a Page
+Set:
 
-1. Navigate to any article or blog post
-2. Click the **LumenAI icon** in the toolbar
-3. Click **"Summarize Page"**
-4. Done — the extension sends the content to your local Django server, which calls Anthropic and returns a structured summary
+```js
+const BACKEND_URL = "http://localhost:8000";
+```
 
 ---
 
-## 🔄 How They're Connected
+# 🌍 Deployment
+
+---
+
+## 🚀 Backend Deployment (Render)
+
+### 1. Push to GitHub
+
+```
+git add .
+git commit -m "initial deploy"
+git push -u origin main
+```
+
+---
+
+### 2. Create Web Service on Render
+
+* Runtime: Python
+* Root Directory: `backend`
+* Build Command:
+
+```
+pip install -r requirements.txt
+```
+
+* Start Command:
+
+```
+gunicorn config.wsgi:application
+```
+
+---
+
+### 3. Environment Variables
+
+```
+SECRET_KEY=your-secret
+DEBUG=False
+ALLOWED_HOSTS=.onrender.com
+
+GEMINI_API_KEY=your_key
+GROQ_API_KEY=your_key
+```
+
+---
+
+### 4. Deploy
+
+After deployment, your API will be:
+
+```
+https://your-app.onrender.com/api/summarize/
+```
+
+---
+
+## 🌐 Frontend Hosting (Vercel)
+
+### 1. Go to Vercel
+
+* Import your repo
+* Set root directory to:
+
+```
+extension
+```
+
+### 2. Deploy
+
+You’ll get:
+
+```
+https://your-app.vercel.app
+```
+
+---
+
+## 🔌 Connect Frontend to Backend
+
+Update:
+
+```js
+const BACKEND_URL = "https://your-app.onrender.com";
+```
+
+---
+
+# 🔐 Chrome Extension Permissions
+
+Example:
+
+```json
+"permissions": [
+  "activeTab",
+  "storage",
+  "scripting"
+],
+"host_permissions": [
+  "https://your-app.onrender.com/*"
+]
+```
+
+---
+
+# 🧪 Testing
+
+## 1. Test Backend
+
+```
+POST /api/summarize/
+```
+
+Example:
+
+```json
+{
+  "content": "Some webpage text...",
+  "url": "https://example.com"
+}
+```
+
+---
+
+## 2. Test Extension
+
+* Open any article
+* Click extension
+* Click summarize
+
+---
+
+## 3. Debug
+
+Go to:
+
+```
+chrome://extensions/
+```
+
+Click:
+
+👉 Service Worker → Inspect
+
+---
+
+# ⚠️ Common Issues
+
+### ❌ 1. Manifest not loading
+
+👉 Load correct folder:
+
+```
+extension/
+```
+
+---
+
+### ❌ 2. API not working
+
+* Check backend URL
+* Ensure CORS enabled
+
+---
+
+### ❌ 3. Render sleeping
+
+* First request may be slow (10–30s)
+
+---
+
+### ❌ 4. Wrong host permissions
+
+👉 Must include deployed backend URL
+
+---
+
+# 🧠 Architecture Overview
 
 ```
 Chrome Extension
-    └── src/background.js
-            └── POST http://localhost:8000/api/summarize/
-                    └── backend/api/views.py
-                            └── backend/api/services/ai_service.py
-                                    └── Gemini API (key from .env)
+   ↓
+Background Script
+   ↓
+Django API (Render)
+   ↓
+Gemini / Groq AI
+   ↓
+Response → Extension UI
 ```
 
-The extension only ever sends extracted page **text** to your backend.
-Your API key lives only in `backend/.env` — never in the browser.
+---
+
+# 💡 Future Improvements
+
+* 🔐 User authentication (turn into SaaS)
+* 📊 Usage analytics dashboard
+* ⚡ Faster responses with caching layer
+* 🧾 Save summaries history
+* 🌐 Multi-language support
 
 ---
 
-## 🔁 Daily Use
+# 👨‍💻 Author
 
-Every time you want to use the extension, start the backend first:
-
-```bash
-cd ai-page-summarizer/backend
-source venv/bin/activate        # Windows: venv\Scripts\activate
-python manage.py runserver
-```
-
-Then use the extension normally in Chrome.
+**Emmanuel Okon**
 
 ---
 
-## 🛠️ Troubleshooting
+# 📄 License
 
-| Problem | Fix |
-|---|---|
-| "Cannot reach the backend" | Make sure `python manage.py runserver` is running |
-| "AI service unavailable" | Check that `GEMINI_API_KEY` is set in `backend/.env` |
-| Extension not loading | Make sure you selected the root `ai-page-summarizer/` folder (containing `manifest.json`), not the `backend/` subfolder |
-| Changes not reflecting | Go to `chrome://extensions` → click the refresh icon on LumenAI |
-| "Cannot access this page" | Extension can't run on `chrome://` pages or PDFs — try any regular `https://` article |
+MIT License
 
 ---
 
-## 🔒 Security Notes
+# ⭐ Support
 
-- API key is stored only in `backend/.env` — never committed to git (add `.env` to `.gitignore`)
-- The extension has no access to the key at any point
-- CORS is open (`*`) in development mode — lock it down before deploying publicly
+If you found this useful:
+
+* Star the repo ⭐
+* Share with others 🚀
